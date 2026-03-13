@@ -1,6 +1,6 @@
 context:
   name: rocm-core
-  version: "7.0.2"
+  version: "7.1.1"
 
 package:
   name: ${{ name|lower }}
@@ -8,7 +8,7 @@ package:
 
 source:
   - url: "https://github.com/ROCm/rocm-core/archive/refs/tags/rocm-${{ version }}.tar.gz"
-    sha256: 2d126d47aa4523d84e5ab026680fa2b1145db332ff5e4aa74b48f8ed0ecd975d
+    sha256: 0171b82a4d028d57035d0d57a01a058f50f1a23959d230cdeab14972dcd94da8
 
 build:
   number: 0
