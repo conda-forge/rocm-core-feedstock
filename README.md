@@ -3,7 +3,7 @@ About rocm-core-feedstock
 
 Feedstock license: [BSD-3-Clause](https://github.com/conda-forge/rocm-core-feedstock/blob/main/LICENSE.txt)
 
-Home: https://github.com/ROCm/rocm-core
+Home: https://github.com/ROCm/rocm-systems
 
 Package license: MIT
 
