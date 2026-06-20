@@ -1,14 +1,14 @@
 context:
   name: rocm-core
-  version: "7.1.0"
+  version: "7.2.1"
 
 package:
   name: ${{ name|lower }}
   version: ${{ version }}
 
 source:
-  - url: "https://github.com/ROCm/rocm-core/archive/refs/tags/rocm-${{ version }}.tar.gz"
-    sha256: 3c7e990ff4da60119c8575982660331bf636f63a9c68c6a344d410b2bdfa5d39
+  - url: "https://github.com/ROCm/rocm-systems/releases/download/rocm-${{ version }}/rocm-core.tar.gz"
+    sha256: 372221919ca31accb1e6567acf21062d56b93b8df0c25ab3e7a9ab15c331578e
 
 build:
   number: 0
@@ -39,7 +39,7 @@ tests:
         - rocm-core
 
 about:
-  homepage: https://github.com/ROCm/rocm-core
+  homepage: https://github.com/ROCm/rocm-systems
   license: MIT
   license_family: MIT
   license_file: LICENSE.md
