@@ -5,5 +5,8 @@ conda_forge_output_validation: true
 github:
   branch_name: main
   tooling_branch_name: main
+bot:
+  version_updates:
+    allowed_tag_globs: "rocm-*"
 provider:
   linux_aarch64: default
