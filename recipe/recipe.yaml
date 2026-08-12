@@ -25,13 +25,16 @@ requirements:
     - ${{ pin_subpackage(name, upper_bound='x.x') }}
 
 tests:
-  - requirements:
-      run:
-        - cmake-package-check
-        - ${{ compiler('c') }}
-        - ${{ compiler('cxx') }}
-    script:
-      - cmake-package-check rocm-core
+  # cmake-package-check (and cmake) are not yet available on linux-riscv64
+  - if: not (linux and riscv64)
+    then:
+      requirements:
+        run:
+          - cmake-package-check
+          - ${{ compiler('c') }}
+          - ${{ compiler('cxx') }}
+      script:
+        - cmake-package-check rocm-core
   - package_contents:
       include:
         - rocm-core/rocm_version.h
