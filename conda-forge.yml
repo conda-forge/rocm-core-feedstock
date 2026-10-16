@@ -3,6 +3,7 @@ bot:
     allowed_tag_globs: rocm-*
 build_platform:
   linux_riscv64: linux_64
+  win_arm64: win_arm64
 conda_build:
   error_overlinking: true
 conda_build_tool: rattler-build
@@ -12,4 +13,5 @@ github:
   tooling_branch_name: main
 provider:
   linux_aarch64: default
+  win_arm64: default
 test: native_and_emulated
