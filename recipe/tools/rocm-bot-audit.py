@@ -11,6 +11,9 @@ download the matching rocm-<version> URL.
 
 Feedstocks come from three sources, merged: the conda-forge/rocm-core team
 (needs a gh login that can read it), a GitHub name search, and EXTRA below.
+Archived feedstocks (for example rocm-opencl-runtime, now an output of
+hip-feedstock) are skipped; NOT_ROCM lists name-search hits that merely
+contain "roc" or "hip".
 
 Usage: python3 recipe/tools/rocm-bot-audit.py [extra-feedstock ...]
 
@@ -30,8 +33,8 @@ NOT_ROCM = {"ansys-rocky-core", "hipace", "hiphive", "hiplot", "hippynn", "hipro
             "r-loose.rock", "rockhound", "rockpool", "rocksdbdict", "rocksdb",
             "rocksdict", "rockstar-galaxies", "rockverse", "rocrate",
             "rocrate-inveniordm", "r-rocit", "r-rockchalk", "r-rocr", "r-rocs",
-            "rocm-opencl-driver", "rocm-opencl-runtime", "hippogriffe",
-            "pyplif-hippos", "rocket-fft", "rocketpy", "rocketry"}
+            "hippogriffe", "pyplif-hippos", "rocket-fft", "rocketpy", "rocketry"}
+LIVE = "select(.archived | not) | .name"
 
 
 def gh(*args):
@@ -45,11 +48,11 @@ def gh(*args):
 def feedstocks():
     names = set(EXTRA) | set(sys.argv[1:])
     names |= set(gh("orgs/conda-forge/teams/rocm-core/repos?per_page=100",
-                    "--jq", ".[].name").split())
+                    "--jq", f".[] | {LIVE}").split())
     for q in ("roc", "hip", "amdsmi"):
         names |= set(gh("-X", "GET", "search/repositories", "-f",
                         f"q=org:conda-forge {q} in:name feedstock", "-f",
-                        "per_page=100", "--jq", ".items[].name").split())
+                        "per_page=100", "--jq", f".items[] | {LIVE}").split())
     names = {n.removesuffix("-feedstock") for n in names}
     return sorted(n for n in names if n not in NOT_ROCM)
 
