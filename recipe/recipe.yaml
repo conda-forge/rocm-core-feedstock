@@ -11,7 +11,7 @@ source:
     sha256: 6213466e5d791a492ddc4fe91f2078295468a9d5da11731b0428ce2edc080622
 
 build:
-  number: 1
+  number: 2
   skip: not linux
 
 requirements:
@@ -49,3 +49,4 @@ extra:
   recipe-maintainers:
     - traversaro
     - isuruf
+    - zklaus
