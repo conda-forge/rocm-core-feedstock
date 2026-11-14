@@ -19,6 +19,7 @@ Usage: python3 recipe/tools/rocm-bot-audit.py [extra-feedstock ...]
 
 Needs only Python 3.9+; `gh` is optional and adds the rocm-core team's repositories.
 """
+
 import hashlib
 import json
 import subprocess
@@ -26,33 +27,82 @@ import sys
 import urllib.error
 import urllib.request
 
-EXTRA = {"rocfft", "hipfft", "hipblas-common", "hipcc", "rocm-bandwidth-test",
-         "roct-thunk-interface", "openmm-hip"}
-NOT_ROCM = {"ansys-rocky-core", "hipace", "hiphive", "hiplot", "hippynn", "hiproc",
-            "hipscat", "hipscat-import", "hips", "python-rocksdb", "repo2rocrate",
-            "r-loose.rock", "rockhound", "rockpool", "rocksdbdict", "rocksdb",
-            "rocksdict", "rockstar-galaxies", "rockverse", "rocrate",
-            "rocrate-inveniordm", "r-rocit", "r-rockchalk", "r-rocr", "r-rocs",
-            "hippogriffe", "pyplif-hippos", "rocket-fft", "rocketpy", "rocketry"}
+EXTRA = {
+    "rocfft",
+    "hipfft",
+    "hipblas-common",
+    "hipcc",
+    "rocm-bandwidth-test",
+    "roct-thunk-interface",
+    "openmm-hip",
+}
+NOT_ROCM = {
+    "ansys-rocky-core",
+    "hipace",
+    "hiphive",
+    "hiplot",
+    "hippynn",
+    "hiproc",
+    "hipscat",
+    "hipscat-import",
+    "hips",
+    "python-rocksdb",
+    "repo2rocrate",
+    "r-loose.rock",
+    "rockhound",
+    "rockpool",
+    "rocksdbdict",
+    "rocksdb",
+    "rocksdict",
+    "rockstar-galaxies",
+    "rockverse",
+    "rocrate",
+    "rocrate-inveniordm",
+    "r-rocit",
+    "r-rockchalk",
+    "r-rocr",
+    "r-rocs",
+    "hippogriffe",
+    "pyplif-hippos",
+    "rocket-fft",
+    "rocketpy",
+    "rocketry",
+}
 LIVE = "select(.archived | not) | .name"
 
 
 def gh(*args):
     try:
-        return subprocess.run(["gh", "api", *args], check=True, capture_output=True,
-                              text=True).stdout
+        return subprocess.run(
+            ["gh", "api", *args], check=True, capture_output=True, text=True
+        ).stdout
     except (subprocess.CalledProcessError, FileNotFoundError):
         return ""
 
 
 def feedstocks():
     names = set(EXTRA) | set(sys.argv[1:])
-    names |= set(gh("orgs/conda-forge/teams/rocm-core/repos?per_page=100",
-                    "--jq", f".[] | {LIVE}").split())
+    names |= set(
+        gh(
+            "orgs/conda-forge/teams/rocm-core/repos?per_page=100",
+            "--jq",
+            f".[] | {LIVE}",
+        ).split()
+    )
     for q in ("roc", "hip", "amdsmi"):
-        names |= set(gh("-X", "GET", "search/repositories", "-f",
-                        f"q=org:conda-forge {q} in:name feedstock", "-f",
-                        "per_page=100", "--jq", f".items[] | {LIVE}").split())
+        names |= set(
+            gh(
+                "-X",
+                "GET",
+                "search/repositories",
+                "-f",
+                f"q=org:conda-forge {q} in:name feedstock",
+                "-f",
+                "per_page=100",
+                "--jq",
+                f".items[] | {LIVE}",
+            ).split()
+        )
     names = {n.removesuffix("-feedstock") for n in names}
     return sorted(n for n in names if n not in NOT_ROCM)
 
@@ -68,13 +118,17 @@ def fetch(url):
 def bot_store(store, name):
     fn = f"{name}.json"
     hx = hashlib.sha1(fn.encode()).hexdigest()[:5]
-    raw = fetch(f"https://github.com/conda-forge/conda-forge-bot-data-{store}"
-                f"/raw/main/{'/'.join(hx)}/{fn}")
+    raw = fetch(
+        f"https://github.com/conda-forge/conda-forge-bot-data-{store}"
+        f"/raw/main/{'/'.join(hx)}/{fn}"
+    )
     return json.loads(raw) if raw else None
 
 
 def has_glob(name):
-    raw = fetch(f"https://raw.githubusercontent.com/conda-forge/{name}-feedstock/main/conda-forge.yml")
+    raw = fetch(
+        f"https://raw.githubusercontent.com/conda-forge/{name}-feedstock/main/conda-forge.yml"
+    )
     return None if raw is None else "allowed_tag_globs" in raw
 
 
@@ -90,7 +144,9 @@ def main():
         nv = str(cand.get("new_version"))
         errs = info.get("new_version_errors") or {}
         if nv != "None" and nv in errs:
-            verdict = "STUCK: cannot fetch candidate" + ("" if glob else ", add allowed_tag_globs")
+            verdict = "STUCK: cannot fetch candidate"
+            if not glob:
+                verdict += ", add allowed_tag_globs"
         else:
             verdict = "ok" if glob else "ok (no glob)"
         print(f"{name:24} {str(glob):5} {nv:16} {len(errs):6}  {verdict}")
