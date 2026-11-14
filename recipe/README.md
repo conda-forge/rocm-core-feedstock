@@ -69,6 +69,27 @@ it to the LLVM major of the ROCm release in their own
 the clang and HIP versions: the global clang pin moves about once a year and
 ROCm's LLVM fork tracks LLVM main, so the two would drift anyway.
 
+## Feedstock tooling: `conda_install_tool: pixi`
+
+All ROCm feedstocks set in `conda-forge.yml`
+
+```yaml
+conda_install_tool: pixi
+```
+
+next to `conda_build_tool: rattler-build`. CI is unchanged by this (the
+tooling environment is solved at build time either way), but the rerender
+then generates a `pixi.toml` with one task per CI variant, so a variant can
+be built, debugged or inspected locally with the exact flags CI uses:
+
+```sh
+pixi run rerender
+pixi run lint
+pixi task list            # build-<variant>, debug-<variant>, inspect-<variant>
+```
+
+The file is marked as generated and only changes on rerender.
+
 ## Layout: `lib<name>` / `lib<name>-devel` / `<name>`
 
 Library feedstocks follow the split used by
