@@ -28,6 +28,18 @@ warning this produces is known; see
 [#21](https://github.com/conda-forge/rocm-core-feedstock/issues/21) for the
 planned `rocm-core` / `librocm-core` split that removes it.
 
+## Known warning: "Overlinking against libc.so.6" with staging outputs
+
+Recipes that build in a `staging:` output and `inherit:` from it (rocfft,
+hipfft, aqlprofile) get warnings such as `Overlinking against "libc.so.6"`,
+`libpthread.so.0`, `libm.so.6` or `ld-linux-x86-64.so.2` for every shared
+library. The linking check of inherited outputs does not see the system
+libraries of the staging build, so glibc looks unattributed. It is a
+rattler-build defect, tracked in
+[prefix-dev/rattler-build#2443](https://github.com/prefix-dev/rattler-build/issues/2443);
+recipes without a staging output (hipify) do not show it. Nothing to fix in
+the recipe; the warnings do not fail the build.
+
 ## Version bot: restrict tags to `rocm-*`
 
 The `rocm-systems` and `rocm-libraries` monorepos carry, next to the
