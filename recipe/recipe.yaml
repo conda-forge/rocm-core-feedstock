@@ -2,8 +2,8 @@ context:
   name: rocm-core
   version: "7.2.4"
 
-package:
-  name: ${{ name|lower }}
+recipe:
+  name: rocm-core-split
   version: ${{ version }}
 
 source:
@@ -11,32 +11,67 @@ source:
     sha256: 6213466e5d791a492ddc4fe91f2078295468a9d5da11731b0428ce2edc080622
 
 build:
-  number: 2
+  number: 3
   skip: not linux
 
-requirements:
-  build:
-    - ${{ compiler('c') }}
-    - ${{ stdlib('c') }}
-    - ${{ compiler('cxx') }}
-    - cmake
-    - ninja
-  run_exports:
-    - ${{ pin_subpackage(name, upper_bound='x.x') }}
-
-tests:
-  - requirements:
-      run:
-        - cmake-package-check
+outputs:
+  - staging:
+      name: rocm-core-build
+    build:
+      script: build.sh
+    requirements:
+      build:
         - ${{ compiler('c') }}
+        - ${{ stdlib('c') }}
         - ${{ compiler('cxx') }}
-    script:
-      - cmake-package-check rocm-core
-  - package_contents:
-      include:
-        - rocm-core/rocm_version.h
-      lib:
-        - rocm-core
+        - cmake
+        - ninja
+
+  - package:
+      name: librocm-core
+    inherit: rocm-core-build
+    build:
+      files:
+        - lib/librocm-core.so*
+    requirements:
+      run_exports:
+        - ${{ pin_subpackage('librocm-core', upper_bound='x.x') }}
+    tests:
+      - package_contents:
+          lib:
+            - rocm-core
+
+  - package:
+      name: rocm-core
+    inherit: rocm-core-build
+    build:
+      files:
+        include:
+          - "**/*"
+        exclude:
+          - lib/librocm-core.so*
+    requirements:
+      run:
+        - ${{ pin_subpackage('librocm-core', exact=True) }}
+      run_exports:
+        - ${{ pin_subpackage('rocm-core', upper_bound='x.x') }}
+    tests:
+      - requirements:
+          run:
+            - cmake-package-check
+            - ${{ compiler('c') }}
+            - ${{ compiler('cxx') }}
+        script:
+          - cmake-package-check rocm-core
+      - package_contents:
+          include:
+            - rocm-core/rocm_version.h
+          files:
+            exists:
+              - .info/version
+              - lib/cmake/rocm-core/rocm-core-config.cmake
+            not_exists:
+              - lib/librocm-core.so*
 
 about:
   homepage: https://github.com/ROCm/rocm-systems
