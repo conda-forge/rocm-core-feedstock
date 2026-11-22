@@ -18,7 +18,10 @@ outputs:
   - staging:
       name: rocm-core-build
     build:
-      script: build.sh
+      script:
+        file: build.sh
+        env:
+          ROCM_VERSION: ${{ version }}
     requirements:
       build:
         - ${{ compiler('c') }}
