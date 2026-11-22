@@ -70,6 +70,7 @@ about:
   summary: "ROCm core package"
 
 extra:
+  feedstock-name: rocm-core
   recipe-maintainers:
     - traversaro
     - isuruf
