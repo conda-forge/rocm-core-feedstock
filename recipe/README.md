@@ -9,7 +9,7 @@ issues; this file is the short version for recipe authors and reviewers.
 ROCm gives no ABI guarantee across minor releases, and every upstream
 component depends on `rocm-core` for that reason. On conda-forge the same
 policy lives in one place, `rocm-core`'s run export
-(`pin_subpackage(name, upper_bound='x.x')`).
+(`pin_subpackage('rocm-core', upper_bound='x.x')`).
 
 Every ROCm recipe therefore lists
 
@@ -23,10 +23,16 @@ host:
 even when nothing links against it. The run export turns this into
 `rocm-core >=7.2.4,<7.3.0a0` in the package's run requirements. Do not move
 it to `run` with a hand-written range: that duplicates the policy in every
-feedstock and loses the exact lower bound. The rattler-build "overdepending"
-warning this produces is known; see
-[#21](https://github.com/conda-forge/rocm-core-feedstock/issues/21) for the
-planned `rocm-core` / `librocm-core` split that removes it.
+feedstock and loses the exact lower bound.
+
+Since 7.2.4 build 3 ([#26](https://github.com/conda-forge/rocm-core-feedstock/pull/26))
+`rocm-core` is a fileless metapackage that depends on the exact build of
+`librocm-core`, which carries all the upstream files (shared library,
+headers, CMake config, `.info/version`). The anchor therefore ships no
+shared object and no longer triggers the rattler-build "overdepending"
+warning. A recipe that actually links `librocm-core.so` lists
+`librocm-core` in `host` next to `rocm-core` and gets its run export
+(`librocm-core >=7.2.4,<7.3.0a0`) for real; the others do not mention it.
 
 ## Known warning: "Overlinking against libc.so.6" with staging outputs
 
