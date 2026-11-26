@@ -31,8 +31,6 @@ EXTRA = {
     "rocfft",
     "hipfft",
     "hipblas-common",
-    "hipcc",
-    "rocm-bandwidth-test",
     "roct-thunk-interface",
     "openmm-hip",
 }
@@ -80,8 +78,13 @@ def gh(*args):
         return ""
 
 
+def live(name):
+    """True if the feedstock repo exists and is not archived."""
+    return bool(gh(f"repos/conda-forge/{name}-feedstock", "--jq", LIVE).strip())
+
+
 def feedstocks():
-    names = set(EXTRA) | set(sys.argv[1:])
+    names = {n for n in set(EXTRA) | set(sys.argv[1:]) if live(n)}
     names |= set(
         gh(
             "orgs/conda-forge/teams/rocm-core/repos?per_page=100",
